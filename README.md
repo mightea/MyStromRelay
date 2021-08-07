@@ -48,3 +48,16 @@ Json Body:
   "level": "[BATTERY_LEVEL]"
 }
 ```
+
+## Docker Compose
+
+```yaml
+mystrom-button-relay:
+  image: ghcr.io/mightea/mystrom_relay
+  container_name: mystrom-button-relay
+  environment:
+    - MYSTROM_RELAY_TARGET_URL=https://*****
+    - MYSTROM_RELAY_SECRET=*****
+  ports:
+    - 3458:5000
+```
