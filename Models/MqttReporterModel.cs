@@ -12,6 +12,8 @@ namespace MyStromRelay.Models
         private readonly ILogger<NodeRedReporterModel> _logger;
         private readonly IMqttClient _client;
 
+        private readonly IMqttClientOptions _options;
+
         private readonly string _mqttTopic;
 
         public MqttReporterModel(ILogger<NodeRedReporterModel> logger)
@@ -23,23 +25,28 @@ namespace MyStromRelay.Models
             var factory = new MqttFactory();
             _client = factory.CreateMqttClient();
 
-            var options = new MqttClientOptions
-            {
-                ChannelOptions = new MqttClientTcpOptions
+            var optionsBuilder = new MqttClientOptionsBuilder()
+                .WithClientId("MyStromRelay")
+                .WithTcpServer(Environment.GetEnvironmentVariable("MQTT_SERVER"), int.Parse(Environment.GetEnvironmentVariable("MQTT_SERVER_PORT") ?? "0"))
+                .WithTls(new MqttClientOptionsBuilderTlsParameters()
                 {
-                    Server = Environment.GetEnvironmentVariable("MQTT_SERVER"),
-                    Port = int.Parse(Environment.GetEnvironmentVariable("MQTT_SERVER_PORT") ?? "0"),
-                    TlsOptions = new MqttClientTlsOptions
-                    {
-                        UseTls = bool.Parse(Environment.GetEnvironmentVariable("MQTT_SERVER_USE_TLS" ?? "false")),
-                        AllowUntrustedCertificates = bool.Parse(Environment.GetEnvironmentVariable("MQTT_SERVER_ALLOW_UNTRUSTED_CERTS" ?? "false"))
-                    }
-                }
-            };
+                    UseTls = bool.Parse(Environment.GetEnvironmentVariable("MQTT_SERVER_USE_TLS" ?? "false")),
+                    CertificateValidationHandler = (w) => true
+                });
 
-            _client.ConnectAsync(options);
+            var username = Environment.GetEnvironmentVariable("MQTT_SERVER_USERNAME");
+            var password = Environment.GetEnvironmentVariable("MQTT_SERVER_PASSWORD");
 
-            _client.UseConnectedHandler(e => Console.WriteLine("### CONNECTED WITH SERVER ###"));
+            if (!String.IsNullOrWhiteSpace(username) && !String.IsNullOrWhiteSpace(password))
+            {
+                _logger.LogInformation("Using credentials from env.");
+                optionsBuilder.WithCredentials(username, password);
+            }
+
+            _options = optionsBuilder.Build();
+
+            _client.UseConnectedHandler(e => _logger.LogTrace("Connected with MQTT server"));
+            _client.UseDisconnectedHandler(e => _logger.LogTrace("Disconnected from server"));
         }
 
         public async Task ReportButtonPress(string buttonId, string action)
@@ -51,10 +58,12 @@ namespace MyStromRelay.Models
             var applicationMessage = new MqttApplicationMessageBuilder()
                         .WithTopic(topic)
                         .WithPayload(buttonId)
-                        .WithAtMostOnceQoS()
+                        .WithAtLeastOnceQoS()
                         .Build();
 
+            await _client.ConnectAsync(_options);
             await _client.PublishAsync(applicationMessage);
+            await _client.DisconnectAsync();
         }
 
         public async Task ReportBatteryStatus(string buttonId, int level)
@@ -66,10 +75,13 @@ namespace MyStromRelay.Models
             var applicationMessage = new MqttApplicationMessageBuilder()
                         .WithTopic(topic)
                         .WithPayload($"{level}")
-                        .WithAtMostOnceQoS()
+                        .WithAtLeastOnceQoS()
                         .Build();
 
+
+            await _client.ConnectAsync(_options);
             await _client.PublishAsync(applicationMessage);
+            await _client.DisconnectAsync();
         }
     }
 }
