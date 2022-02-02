@@ -1,13 +1,11 @@
-using System;
 using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 
 namespace MyStromRelay.Models
 {
-    public class NodeRedReporterModel
+    public class NodeRedReporterModel : IReporterModel
     {
         internal static string HTTP_CLIENT_NAME_NODE_RED = "node-red";
 
@@ -20,7 +18,7 @@ namespace MyStromRelay.Models
             _clientFactory = clientFactory;
         }
 
-        internal async Task ReportButtonPress(string buttonId, string action)
+        public async Task ReportButtonPress(string buttonId, string action)
         {
             var client = _clientFactory.CreateClient(HTTP_CLIENT_NAME_NODE_RED);
             var content = new StringContent(JsonSerializer.Serialize(new
@@ -35,7 +33,7 @@ namespace MyStromRelay.Models
             httpResponse.EnsureSuccessStatusCode();
         }
 
-        internal async Task ReportBatteryStatus(string buttonId, int level)
+        public async Task ReportBatteryStatus(string buttonId, int level)
         {
             var client = _clientFactory.CreateClient(HTTP_CLIENT_NAME_NODE_RED);
             var content = new StringContent(JsonSerializer.Serialize(new

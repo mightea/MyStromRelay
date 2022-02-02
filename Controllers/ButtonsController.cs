@@ -1,14 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Net.Http;
 using System.Text;
-using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 using MyStromRelay.Models;
 
 namespace MyStromRelay.Controllers
@@ -19,11 +14,11 @@ namespace MyStromRelay.Controllers
     {
         private readonly string _secret;
 
-        private readonly NodeRedReporterModel _nodeRedReporter;
+        private readonly IReporterModel _reporterModel;
 
-        public ButtonsController(NodeRedReporterModel nodeRedReporter)
+        public ButtonsController(IReporterModel reporterModel)
         {
-            _nodeRedReporter = nodeRedReporter;
+            _reporterModel = reporterModel;
             _secret = Environment.GetEnvironmentVariable("MYSTROM_RELAY_SECRET");
         }
 
@@ -44,7 +39,7 @@ namespace MyStromRelay.Controllers
                 return Unauthorized("Secret does not match");
             }
 
-            await _nodeRedReporter.ReportButtonPress(id, action);
+            await _reporterModel.ReportButtonPress(id, action);
             return Ok();
         }
 
@@ -57,7 +52,7 @@ namespace MyStromRelay.Controllers
                 return Unauthorized("Secret does not match");
             }
 
-            await _nodeRedReporter.ReportBatteryStatus(mac, battery);
+            await _reporterModel.ReportBatteryStatus(mac, battery);
             return Ok();
         }
     }

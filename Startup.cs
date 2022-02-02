@@ -35,7 +35,8 @@ namespace MyStromRelay
             });
 
 
-            services.AddSingleton<NodeRedReporterModel>();
+            // services.AddSingleton<NodeRedReporterModel>();
+            services.AddSingleton<IReporterModel, MqttReporterModel>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
