@@ -4,15 +4,16 @@ A simple application to relay HTTP only webhook calls from MyStrom Buttons to MQ
 
 ## Configuration
 
-| Environment Variable   | Required | Description                                                                                                                   |
-| ---------------------- | :------: | :---------------------------------------------------------------------------------------------------------------------------- |
-| `MYSTROM_RELAY_SECRET` |   Yes    | The relays secret can be specify to only relay calls that contain this secret, to at least make it a little bit more "secure" |
-| `MQTT_SERVER`          |   Yes    | The MQTT server hostname or ip                                                                                                |
-| `MQTT_SERVER_PORT`     |   Yes    | The MQTT server port                                                                                                          |
-| `MQTT_SERVER_USE_TLS`  |    No    | Set to `true` if the MQTT server requires TLS, defaults to `false`                                                            |
-| `MQTT_SERVER_USERNAME` |    No    | The server credentials username                                                                                               |
-| `MQTT_SERVER_PASSWORD` |    No    | The server credentials password                                                                                               |
-| `MQTT_TOPIC`           |    No    | The MQTT base topic for the button messages, defaults to `mystrom_button`                                                     |
+| Environment Variable        | Required | Description                                                                                                                   |
+| ----------------------------| :------: | :---------------------------------------------------------------------------------------------------------------------------- |
+| `MYSTROM_RELAY_SECRET`      |   Yes    | The relays secret can be specify to only relay calls that contain this secret, to at least make it a little bit more "secure" |
+| `MQTT_SERVER`               |   Yes    | The MQTT server hostname or ip                                                                                                |
+| `MQTT_SERVER_PORT`          |   Yes    | The MQTT server port                                                                                                          |
+| `MQTT_SERVER_USE_TLS`       |    No    | Set to `true` if the MQTT server requires TLS, defaults to `false`                                                            |
+| `MQTT_SERVER_USERNAME`      |    No    | The server credentials username                                                                                               |
+| `MQTT_SERVER_PASSWORD`      |    No    | The server credentials password                                                                                               |
+| `MQTT_TOPIC`                |    No    | The MQTT base topic for the button messages, defaults to `mystrom_button`                                                     |
+| `HOMEASSISTANT_API_TOKEN`   |    No    | The API Token of your Home Assitant Instance                                                                                  |
 
 ## Button configuration
 
