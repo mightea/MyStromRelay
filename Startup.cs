@@ -23,20 +23,27 @@ namespace MyStromRelay
             var myStromRelayUrl = Environment.GetEnvironmentVariable("MYSTROM_RELAY_TARGET_URL");
             if (String.IsNullOrWhiteSpace(myStromRelayUrl))
             {
-                throw new ArgumentException("The required environment varianle MYSTROM_RELAY_TARGET_URL was not set");
+                throw new ArgumentException("The required environment variable MYSTROM_RELAY_TARGET_URL was not set");
             }
 
             services.AddControllers();
-            services.AddHttpClient(NodeRedReporterModel.HTTP_CLIENT_NAME_NODE_RED, c =>
+            if (!String.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("HOMEASSISTANT_API_TOKEN")))
             {
-                c.BaseAddress = new Uri(myStromRelayUrl);
-                c.DefaultRequestHeaders.Accept
-                    .Add(new MediaTypeWithQualityHeaderValue("application/json"));
-            });
+                services.AddHttpClient(HomeassistantReporterModel.HTTP_CLIENT_NAME, c =>
+                {
+                    c.BaseAddress = new Uri(myStromRelayUrl);
+                    c.DefaultRequestHeaders.Authorization =
+                    new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", Environment.GetEnvironmentVariable("HOMEASSISTANT_API_TOKEN"));
+                    c.DefaultRequestHeaders.Accept
+                        .Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                });
+                services.AddSingleton<IReporterModel, HomeassistantReporterModel>();
+            }
 
-
-            // services.AddSingleton<NodeRedReporterModel>();
-            services.AddSingleton<IReporterModel, MqttReporterModel>();
+            if (!String.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("MQTT_SERVER")))
+            {
+                services.AddSingleton<IReporterModel, MqttReporterModel>();
+            }
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
